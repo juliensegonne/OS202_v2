@@ -10,7 +10,13 @@
 ## lscpu
 
 ```
-coller ici les infos *utiles* de lscpu. 
+CPU family:          23
+    Model:               24
+    Thread(s) per core:  2
+    Core(s) per socket:  4
+    Socket(s):           1
+    Stepping:            1
+    BogoMIPS:            4192.00
 ```
 
 *Des infos utiles s'y trouvent : nb core, taille de cache*
@@ -30,16 +36,19 @@ coller ici les infos *utiles* de lscpu.
 
   ordre           | time    | MFlops  | MFlops(n=2048) 
 ------------------|---------|---------|----------------
-i,j,k (origine)   | 2.73764 | 782.476 |                
-j,i,k             |  |  |    
-i,k,j             |  |  |    
-k,i,j             |  |  |    
-j,k,i             |  |  |    
-k,j,i             |  |  |    
+i,j,k (origine)   | 24.4173 | 87.9494 |                
+j,i,k             | 24.1074 | 89.08   |    
+i,k,j             | 31.6681 | 67.8122 |    
+k,i,j             | 33.5638 | 63.9821 |    
+j,k,i             | 1.32807 | 1616.99 |    
+k,j,i             | 2.03138 | 1057.15 |    
 
 
 *Discussion des résultats*
 
+Nous savons que les matrices sont stockées colonne par colonne. Or si la première variable à varier
+(la boucle la plus profonde) correspond aux colonnes d'une matrice, il y aura une redondance de chargement,
+à chaque itération une colonne sera rechargée (alors que pour aller de ligne en ligne on ne charge qu'une seule colonne). Ainsi, les coeurs sont surchargés.
 
 
 ### OMP sur la meilleure boucle 
@@ -48,17 +57,16 @@ k,j,i             |  |  |
 
   OMP_NUM         | MFlops  | MFlops(n=2048) | MFlops(n=512)  | MFlops(n=4096)
 ------------------|---------|----------------|----------------|---------------
-1                 |  |
-2                 |  |
-3                 |  |
-4                 |  |
-5                 |  |
-6                 |  |
-7                 |  |
-8                 |  |
+1                 | 2097.46 |
+2                 | 3735.89 |
+3                 | 5303.45 |
+4                 | 5741.66 |
+5                 | 5678.63 |
+6                 | 5938.99 |
+7                 | 6552.21 |
+8                 | 6703.14 |
 
-
-
+On cherche à avoir un nombre de threads qui maximise l'accélération.
 
 ### Produit par blocs
 
@@ -67,12 +75,12 @@ k,j,i             |  |  |
   szBlock         | MFlops  | MFlops(n=2048) | MFlops(n=512)  | MFlops(n=4096)
 ------------------|---------|----------------|----------------|---------------
 origine (=max)    |  |
-32                |  |
-64                |  |
-128               |  |
-256               |  |
-512               |  | 
-1024              |  |
+32                | 2442.15 |
+64                | 3361.72 |
+128               | 2841.04 |
+256               | 5607.6 |
+512               | 3719.04 | 
+1024              | 5124.47 |
 
 
 
@@ -83,8 +91,8 @@ origine (=max)    |  |
 
   szBlock      | OMP_NUM | MFlops  | MFlops(n=2048) | MFlops(n=512)  | MFlops(n=4096)|
 ---------------|---------|---------|-------------------------------------------------|
-A.nbCols       |  1      |         |                |                |               |
-512            |  8      |         |                |                |               |
+A.nbCols       |  1      | 1976.1  |                |                |               |
+512            |  8      | 3947.09 |                |                |               |
 ---------------|---------|---------|-------------------------------------------------|
 Speed-up       |         |         |                |                |               |
 ---------------|---------|---------|-------------------------------------------------|
