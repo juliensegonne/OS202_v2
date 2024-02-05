@@ -9,7 +9,7 @@ rank    = globCom.rank
 name    = MPI.Get_processor_name()
 
 # Dimension du problème (peut-être changé)
-dim = 12
+dim = 120
 
 Nloc=dim//nbp
 
