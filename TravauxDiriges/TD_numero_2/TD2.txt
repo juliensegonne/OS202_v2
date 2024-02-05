@@ -1,0 +1,28 @@
+1.3 Ensemble de mandelbrot
+
+nombre de tâches = 1 :
+Temps du calcul de l'ensemble de Mandelbrot : 4.300524950027466
+Temps de constitution de l'image : 0.2887234687805176
+
+
+nombre de tâches = 2 :
+Temps du calcul de l'ensemble de Mandelbrot : 2.3807177543640137
+Temps de constitution de l'image : 0.07704854011535645
+speedup = 1,80
+
+
+nombre de tâches = 3 :
+Temps du calcul de l'ensemble de Mandelbrot : 2.0012011528015137
+Temps de constitution de l'image : 0.08327937126159668
+speedup = 2,15
+
+nombre de tâches = 4 :
+Temps du calcul de l'ensemble de Mandelbrot : 1.8156838417053223
+Temps de constitution de l'image : 0.08396053314208984
+speedup = 2,36
+
+Le temps diminue car on répartie les tâches équitablement en parallélisant le code, on utilise donc un maximum de thread.
+
+1.4 Produit matrice-vecteur
+
+1.
