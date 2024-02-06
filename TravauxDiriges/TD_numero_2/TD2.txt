@@ -1,10 +1,29 @@
+Julien Segonne
+
+1.1
+Il y a 2 scénarios, le thread 2 (noté t2) peut recevoir ou bien les données de t0 ou bien celles de t1.
+
+1. Si t2 reçoit les données de t0 en premier, il peut ensuite envoyer ses données à t0 (qui les attend) puis recevoir celles de t1.
+Il n'y a pas d'interblocage.
+
+2. Si t2 reçoit d'abord les données de t1, il souhaite ensuite envoyer ses propres données à t0 mais ce dernier est en attente d'envoyer ses données.
+Les deux threads attendent chacun de pouvoir envoyer leurs données. Il y a donc interblocage.
+
+La probabilité d'avoir interblocage est donc de 0,5 car aussi bien t0 que t1 peut envoyer ses données en premier.
+
 1.2
 
-loi d'amdhal pour n>>1 : S=1/(1-p)
+1. loi d'amdhal pour n>>1 : S=1/(1-p)
 p=0,9
 donc S=10
 
+2. On pourra prendre 5 noeuds pour ne pas utiliser trop de ressources au vu de la question précédente.
 
+3. loi de Gustafson :
+S=s+n.p=(n-1)p
+ici p=0,9 et n=4
+
+donc S=2,7
 
 
 1.3 Ensemble de mandelbrot
