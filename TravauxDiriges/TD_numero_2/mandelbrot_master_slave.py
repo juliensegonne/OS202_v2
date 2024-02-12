@@ -65,37 +65,39 @@ deb = time()
 
 h=height//nbp
 
-if nbp>1 :
-    for r in range(1,nbp-1) :
-        if rank == r :
-            convergence = np.empty((width, height), dtype=np.double)
-            for y in range(r*h,(r+1)*h):
-                for x in range(width):
-                    c = complex(-2. + scaleX*x, -1.125 + scaleY * y)
-                    convergence[x, y] = mandelbrot_set.convergence(c, smooth=True)
-            globCom.send(convergence, dest=root, tag=r)
-                    
-    if rank == nbp-1 :
-            convergence = np.empty((width, height), dtype=np.double)
-            for y in range((nbp-1)*h,height):
-                for x in range(width):
-                    c = complex(-2. + scaleX*x, -1.125 + scaleY * y)
-                    convergence[x, y] = mandelbrot_set.convergence(c, smooth=True)
-            globCom.send(convergence, dest=root, tag=nbp-1)
-            
-if rank == 0 :
-    convergence_finale = np.empty((width, height), dtype=np.double)
-    for y in range(h):
-            for x in range(width):
-                c = complex(-2. + scaleX*x, -1.125 + scaleY * y)
-                convergence_finale[x, y] = mandelbrot_set.convergence(c, smooth=True)
-    if nbp>1 :
-        for r in range(1,nbp-1) :
-            convergence = globCom.recv(source=r, tag=r)
-            convergence_finale[:,r*h:(r+1)*h-1] = convergence[:,r*h:(r+1)*h-1]
+
+if rank==0 :                                                    #maître
+    convergence = np.empty((width, height), dtype=np.double)
+    for r in range(1,nbp) :                                   #on envoie du travail à tous les processeurs
+        globCom.send(r-1,dest=r)
+    compteur = nbp-1
+    while compteur != height-1 :
+        Status=MPI.Status()
+        conv,r,ligne=globCom.recv(source=MPI.ANY_SOURCE,status=Status)          #réception du travail
+        convergence[ligne,:] = conv
+        globCom.send(compteur,r)                                               #envoi de la nouvelle ligne
+        compteur+=1
+    for l in range(1,nbp) :                                                  #envoi du message d'arrêt
+        globCom.send(-1,dest=l)
+    for m in range(1,nbp-1) :                                            #réception des dernières lignes
+        Status=MPI.Status()
+        conv,r,ligne=globCom.recv(source=MPI.ANY_SOURCE,status=Status)
+        convergence[ligne,:] = conv
+
+        
+if rank!=0 :                                  #esclaves
+    ligne = 0
+    while ligne != -1 :
+        ligne = globCom.recv(source=0)
+        if ligne == -1 :                                              #sortie de la boucle while si on reçoit le message d'arrêt
+            break
+        conv = np.empty(width, dtype=np.double)
+        for x in range(width):                                         #calcul mandelbrot sur une ligne
+                c = complex(-2. + scaleX*x, -1.125 + scaleY * ligne)
+                conv[x]= mandelbrot_set.convergence(c, smooth=True)
+        globCom.send((conv,rank,ligne),dest=0)                         #envoie de la ligne, du processeur et du numero de ligne
+
     
-        convergence = globCom.recv(source=nbp-1, tag=nbp-1)
-        convergence_finale[:,(nbp-1)*h:height] = convergence[:,(nbp-1)*h:height]
 
 
 fin = time()
@@ -104,7 +106,7 @@ print(f"Temps du calcul de l'ensemble de Mandelbrot : {fin-deb}")
 # Constitution de l'image résultante :
 deb = time()
 if rank == 0 :    
-    image = Image.fromarray(np.uint8(matplotlib.cm.plasma(convergence_finale.T)*255))
+    image = Image.fromarray(np.uint8(matplotlib.cm.plasma(convergence.T)*255))
     fin = time()
     print(f"Temps de constitution de l'image : {fin-deb}")
     image.show()
