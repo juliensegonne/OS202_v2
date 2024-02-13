@@ -18,6 +18,11 @@ CPU family:          23
     Stepping:            1
     BogoMIPS:            4192.00
 ```
+Caches (sum of all):     
+  L1d:                   128 KiB (4 instances)
+  L1i:                   256 KiB (4 instances)
+  L2:                    2 MiB (4 instances)
+  L3:                    4 MiB (1 instance)
 
 *Des infos utiles s'y trouvent : nb core, taille de cache*
 
