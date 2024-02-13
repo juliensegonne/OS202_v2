@@ -9,7 +9,7 @@ rank    = globCom.rank
 name    = MPI.Get_processor_name()
 
 # Dimension du problème (peut-être changé)
-dim = 120
+dim = 12
 
 Nloc=dim//nbp
 
@@ -21,24 +21,17 @@ A = np.array([[(i+j) % dim+1. for i in range(dim)] for j in range(dim)])
 u = np.array([i+1. for i in range(dim)])
 #print(f"u = {u}")
 
-v=np.zeros(dim)
+v=np.zeros(Nloc)
 
 for k in range(dim):    
-    for j in range(rank*Nloc,(rank+1)*Nloc) :
-        v[k]+=A[k,j]*u[j]
-
-for r in range(nbp):
-    if r!=rank:
-        globCom.send(v,dest=r)
-
-for i in range(nbp-1):
-    Status=MPI.Status()
-    v_tmp=globCom.recv(source=MPI.ANY_SOURCE,status=Status)
-    v+=v_tmp
+    for j in range(Nloc) :
+        v[j]+=A[j+rank*Nloc,k]*u[k]
 
 
-    print("A.u = ",np.array(v))
+res = np.zeros(dim)
+globCom.Gather(v,res,0)
+if rank == 0 :
+    print("A.u = ",res)
 
 
-#globCom.gather
-globCom.allgather
+
