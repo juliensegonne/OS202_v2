@@ -9,7 +9,7 @@ rank    = globCom.rank
 name    = MPI.Get_processor_name()
 
 # Dimension du problème (peut-être changé)
-dim = 64
+dim = 120
 
 Nloc=dim//nbp
 
@@ -29,10 +29,9 @@ for k in range(Nloc):
 
 
 res = np.zeros(dim)
-globCom.Gather(v,res,0)
+globCom.Allgather(v,res)
 
-if rank == 0 :
-    print("A.u = ",res)
+print("A.u = ",res)
 
 
 
