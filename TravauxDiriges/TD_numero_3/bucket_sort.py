@@ -10,26 +10,26 @@ name    = MPI.Get_processor_name()
 taille = 100
 
 if rank==0 :
-    T = np.random.random(taille) * 100
-    m,M=min(T),max(T)
-    t=[[]]*nbp
-    for k in range(taille) :
-        j = math.floor((nbp-1)*(T[k]-m)/(M-m))
-        t[j].append(T[k])
+    T = np.random.random(taille)
+    local_buckets=[[]]*nbp
+    for nombre in T :
+        i = math.floor(nombre*nbp)        #répartition locale
+        local_buckets[i].append(nombre)
+        
     for r in range(1,nbp) :
-        globCom.send(t[r],r)
+        globCom.send(local_buckets[r],r)
+        
+    bucket=local_buckets[0]
+    bucket.sort()
     
 else :
-    liste = globCom.recv(source=0)
-    liste=liste.sort()
-    globCom.send(liste,dest=0)
+    bucket = globCom.recv(source=0)
+    bucket.sort()
+
+res = globCom.gather(bucket, root=0)[0]
 
 if rank==0 :
-    T_final=[]
-    for r in range(1,nbp) :
-        T_final+=globCom.recv(source=0)
-    T_final+=t[nbp]
-    print(T_final)
+    print(res)
     
     
     
